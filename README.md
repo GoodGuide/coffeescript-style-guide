@@ -53,7 +53,7 @@ Use **spaces only**, with **2 spaces** per indentation level. Never mix tabs and
 <a name="maximum_line_length"/>
 ### Maximum Line Length
 
-Limit all lines to a maximum of 79 characters.
+Limit all lines to a maximum of 100 characters.
 
 <a name="blank_lines"/>
 ### Blank Lines
@@ -97,8 +97,8 @@ Avoid extraneous whitespace in the following situations:
 - Immediately inside parentheses, brackets or braces
 
     ```coffeescript
-       ($ 'body') # Yes
-       ( $ 'body' ) # No
+       $('body') # Yes
+       $( 'body' ) # No
     ```
 
 - Immediately before a comma
@@ -141,6 +141,8 @@ Additional recommendations:
 
 <a name="comments"/>
 ## Comments
+
+Comments should be written in English, with correct capitalization, punctuation, and without typographical errors. A hard-to-understand comment is just as bad as an outdated/incorrect one.
 
 If modifying code that is described by an existing comment, update the comment such that it accurately reflects the new code. (Ideally, improve the code to obviate the need for the comment, and delete the comment entirely.)
 
@@ -196,13 +198,13 @@ However, inline comments can be useful in certain scenarios:
 <a name="naming_conventions"/>
 ## Naming Conventions
 
-Use `camelCase` (with a leading lowercase character) to name all variables, methods, and object properties.
+Use `lowerCamelCase` (with a leading lowercase character) to name all variables, methods, and object properties.
 
-Use `CamelCase` (with a leading uppercase character) to name all classes. _(This style is also commonly referred to as `PascalCase`, `CamelCaps`, or `CapWords`, among [other alternatives][camel-case-variations].)_
+Use `UpperCamelCase` (with a leading uppercase character) to name all classes.
 
-_(The **official** CoffeeScript convention is camelcase, because this simplifies interoperability with JavaScript. For more on this decision, see [here][coffeescript-issue-425].)_
+_(This is the **official** CoffeeScript convention, because this simplifies interoperability with JavaScript. For more on this decision, see [here][coffeescript-issue-425].)_
 
-For constants, use all uppercase with underscores:
+For naming variables that are to be considered "constants", use all uppercase with underscores:
 
 ```coffeescript
 CONSTANT_LIKE_THIS
@@ -219,11 +221,20 @@ _privateMethod: ->
 
 _(These guidelines also apply to the methods of a class.)_
 
-When declaring a function that takes arguments, always use a single space after the closing parenthesis of the arguments list:
+When declaring a function that takes arguments, always use a single space before and after the parentheses of the arguments list:
 
 ```coffeescript
 foo = (arg1, arg2) -> # Yes
 foo = (arg1, arg2)-> # No
+foo =(arg1, arg2) -> # No
+```
+
+Similarly, the arrow `->` or `=>` should be given space on either side as well, save for the trailing side if it would leave trailing whitespace on the line.
+
+```coffeescript
+foo =-> # No
+foo = (bar) ->bar.foo? # No
+foo = (bar) -> bar.foo? # Yes
 ```
 
 Do not use parentheses when declaring functions that take no arguments:
@@ -259,7 +270,9 @@ print inspect value
 new Tag(new Value(a, b), new Arg(c))
 ```
 
-You will sometimes see parentheses used to group functions (instead of being used to group function parameters). Examples of using this style (hereafter referred to as the "function grouping style"):
+### Grouping
+
+Instead of this:
 
 ```coffeescript
 ($ '#selektor').addClass 'klass'
@@ -267,22 +280,13 @@ You will sometimes see parentheses used to group functions (instead of being use
 (foo 4).bar 8
 ```
 
-This is in contrast to:
+Do this:
 
 ```coffeescript
 $('#selektor').addClass 'klass'
 
 foo(4).bar 8
 ```
-
-In cases where method calls are being chained, some adopters of this style prefer to use function grouping for the initial call only:
-
-```coffeescript
-($ '#selektor').addClass('klass').hide() # Initial call only
-(($ '#selektor').addClass 'klass').hide() # All calls
-```
-
-The function grouping style is not recommended. However, **if the function grouping style is adopted for a particular project, be consistent with its usage.**
 
 <a name="strings"/>
 ## Strings
@@ -301,17 +305,17 @@ Prefer single quoted strings (`''`) instead of double quoted (`""`) strings, unl
 
 Favor `unless` over `if` for negative conditions.
 
-Instead of using `unless...else`, use `if...else`:
+Block-style `unless` is okay, but don't use it with an `else` case. Instead of using `unless...else`, use `if...else`:
 
 ```coffeescript
-  # Yes
-  if true
+  # No
+  unless false
     ...
   else
     ...
 
-  # No
-  unless false
+  # Yes
+  if true
     ...
   else
     ...
@@ -330,6 +334,20 @@ Multi-line if/else clauses should use indentation:
   if true then ...
   else ...
 ```
+
+Use the ternary-operator-style inline if-then-else freely:
+
+```coffeescript
+foo = if bar? then 'baz' else 'whiz' # Yes
+
+# No
+foo = if bar?
+        'baz'
+      else
+        'whiz'
+```
+
+Especially in the case of assignment, prefer the ternary-style.
 
 <a name="looping_and_comprehensions"/>
 ## Looping and Comprehensions
@@ -402,7 +420,7 @@ Annotation types:
 - `HACK`: describe the use of a questionable (or ingenious) coding practice
 - `REVIEW`: describe code that should be reviewed to confirm implementation
 
-If a custom annotation is required, the annotation should be documented in the project's README.
+If a custom annotation is required, the annotation should be documented here.
 
 <a name="miscellaneous"/>
 ## Miscellaneous
@@ -419,7 +437,21 @@ If a custom annotation is required, the annotation should be documented in the p
 
 ```coffeescript
 temp or= {} # Yes
-temp = temp || {} # No
+temp = temp or {} # No
+```
+
+Prefer CoffeeScript's existential operator `?` to alternatives:
+
+```coffeescript
+# No
+_.isNull(foo)
+foo() if _.isFunction(foo)
+foo.bar.blah() if !_.isNull(foo) and _.has(foo, 'bar') and _.isFunction(foo.bar.blah)
+
+# Yes
+foo?
+foo?()
+foo?.bar?.blah?()
 ```
 
 Prefer shorthand notation (`::`) for accessing an object's prototype:
@@ -429,10 +461,11 @@ Array::slice # Yes
 Array.prototype.slice # No
 ```
 
-Prefer `@property` over `this.property`.
+Prefer `@property` over `@.property` or `this.property`.
 
 ```coffeescript
 return @property # Yes
+return @.property # No
 return this.property # No
 ```
 
@@ -451,6 +484,16 @@ Use splats (`...`) when working with functions that accept variable numbers of a
 console.log args... # Yes
 
 (a, b, c, rest...) -> # Yes
+```
+
+### Destructuring assignments
+
+Destructuring assignments can and should be used with any depth of array and object nesting, to help pull out deeply nested properties.
+
+```coffeescript
+someObject = { a: 'value for a', b: 'value for b' }
+{ a, b } = someObject
+console.log "a is '#{a}', b is '#{b}'"
 ```
 
 [coffeescript]: http://jashkenas.github.com/coffee-script/
